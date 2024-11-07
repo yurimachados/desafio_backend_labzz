@@ -8,7 +8,12 @@ export const validateUser = (req: Request, res: Response, next: NextFunction): R
     }
 
     if (!email || typeof email !== 'string') {
-        return res.status(400).json({ error: 'Email é obrigatório e deve ser uma string' });
+        return res.status(400).json({ error: 'Email é obrigatório e deve ser valido' });
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Email inválido' });
     }
 
     if (!password || typeof password !== 'string') {
