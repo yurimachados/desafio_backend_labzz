@@ -7,7 +7,7 @@
     "start": "node dist/index.js",
     "build": "tsc",
     "dev": "ts-node src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "prisma": "prisma generate",
     "watch": "tsc --watch",
     "serve": "nodemon dist/index.js",
@@ -19,9 +19,13 @@
   "devDependencies": {
     "@types/bcrypt": "5.0.2",
     "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.9.0",
     "concurrently": "^9.1.0",
+    "jest": "^29.7.0",
+    "jest-mock-extended": "^4.0.0-beta1",
     "nodemon": "^2.0.22",
+    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.1",
     "typescript": "^5.6.3"
   },
