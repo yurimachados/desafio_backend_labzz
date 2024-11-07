@@ -1,5 +1,6 @@
 const express = require('express');
 const userController = require('../controllers/userController');
+const { validateUser } = require('../middlewares/validationMiddleware');
 const router = express.Router();
 
 /**
@@ -7,7 +8,7 @@ const router = express.Router();
  * @desc Cria um novo usuário
  * @access Público
  */
-router.post('/users', userController.createUser);
+router.post('/users', validateUser, userController.createUser);
 
 /**
  * @route GET /users
@@ -28,7 +29,7 @@ router.get('/users/:id', userController.getUserById);
  * @desc Atualiza um usuário pelo ID
  * @access Público
  */
-router.put('/users/:id', userController.updateUser);
+router.put('/users/:id', validateUser, userController.updateUser);
 
 /**
  * @route DELETE /users/:id
