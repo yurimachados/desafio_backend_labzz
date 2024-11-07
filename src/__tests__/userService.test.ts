@@ -1,200 +1,267 @@
 // userService.test.ts
-import { prismaMock } from '../utils/singleton';
-import { createUser, getAllUsers, getUserById, updateUser, deleteUser } from '../services/userService';
-import bcrypt from 'bcrypt';
+import { prismaMock } from "../utils/singleton";
+import {
+  createUser,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUser,
+} from "../services/userService";
+import bcrypt from "bcrypt";
 
-jest.mock('../prismaClient', () => ({
-    __esModule: true,
-    default: prismaMock,
+jest.mock("../prismaClient", () => ({
+  __esModule: true,
+  default: prismaMock,
 }));
 
-describe('User Service', () => {
-    it('deve criar um novo usuário', async () => {
-        const inputData = {
-            email: 'test@example.com',
-            username: 'testuser',
-            password: 'password123',
-        };
+describe("User Service", () => {
+  it("deve criar um novo usuário", async () => {
+    const inputData = {
+      email: "test@example.com",
+      username: "testuser",
+      password: "password123",
+    };
 
-        const hashedPassword = await bcrypt.hash(inputData.password, 10);
+    const hashedPassword = await bcrypt.hash(inputData.password, 10);
 
-        prismaMock.user.findUnique.mockResolvedValue(null);
-        prismaMock.user.create.mockResolvedValue({
-            id: 1,
-            ...inputData,
-            password: hashedPassword,
-        });
-
-        const user = await createUser(inputData);
-
-        expect(user).toHaveProperty('id', 1);
-        expect(user.email).toBe(inputData.email);
-        expect(user.username).toBe(inputData.username);
-        expect(await bcrypt.compare(inputData.password, user.password)).toBe(true);
+    prismaMock.user.findUnique.mockResolvedValue(null);
+    prismaMock.user.create.mockResolvedValue({
+      id: 1,
+      ...inputData,
+      password: hashedPassword,
     });
 
-    it('deve lançar um erro se o email já estiver em uso', async () => {
-        const inputData = {
-            email: 'test@example.com',
-            username: 'testuser',
-            password: 'password123',
-        };
+    const user = await createUser(inputData);
 
-        prismaMock.user.findUnique.mockResolvedValue({
-            id: 1,
-            email: inputData.email,
-            username: inputData.username,
-            password: 'hashedpassword',
-        });
+    expect(user).toHaveProperty("id", 1);
+    expect(user.email).toBe(inputData.email);
+    expect(user.username).toBe(inputData.username);
+    expect(await bcrypt.compare(inputData.password, user.password)).toBe(true);
+  });
 
-        await expect(createUser(inputData)).rejects.toThrow("Email já está em uso");
+  it("deve lançar um erro se o email já estiver em uso", async () => {
+    const inputData = {
+      email: "test@example.com",
+      username: "testuser",
+      password: "password123",
+    };
+
+    prismaMock.user.findUnique.mockResolvedValue({
+      id: 1,
+      email: inputData.email,
+      username: inputData.username,
+      password: "hashedpassword",
     });
 
-    it('deve lançar um erro se a criação do usuário falhar', async () => {
-        const inputData = {
-            email: 'test@example.com',
-            username: 'testuser',
-            password: 'password123',
-        };
+    await expect(createUser(inputData)).rejects.toThrow("Email já está em uso");
+  });
 
-        prismaMock.user.findUnique.mockResolvedValue(null);
-        prismaMock.user.create.mockRejectedValue(new Error("Falha na criação do usuário"));
+  it("deve lançar um erro se a criação do usuário falhar", async () => {
+    const inputData = {
+      email: "test@example.com",
+      username: "testuser",
+      password: "password123",
+    };
 
-        await expect(createUser(inputData)).rejects.toThrow("Falha na criação do usuário");
+    prismaMock.user.findUnique.mockResolvedValue(null);
+    prismaMock.user.create.mockRejectedValue(
+      new Error("Falha na criação do usuário"),
+    );
+
+    await expect(createUser(inputData)).rejects.toThrow(
+      "Falha na criação do usuário",
+    );
+  });
+
+  it("deve criar um usuário com senha criptografada", async () => {
+    const inputData = {
+      email: "test2@example.com",
+      username: "testuser2",
+      password: "password123",
+    };
+
+    prismaMock.user.findUnique.mockResolvedValue(null);
+    prismaMock.user.create.mockResolvedValue({
+      id: 2,
+      ...inputData,
+      password: await bcrypt.hash(inputData.password, 10),
     });
 
-    it('deve criar um usuário com senha criptografada', async () => {
-        const inputData = {
-            email: 'test2@example.com',
-            username: 'testuser2',
-            password: 'password123',
-        };
+    const user = await createUser(inputData);
 
-        prismaMock.user.findUnique.mockResolvedValue(null);
-        prismaMock.user.create.mockResolvedValue({
-            id: 2,
-            ...inputData,
-            password: await bcrypt.hash(inputData.password, 10),
-        });
+    expect(await bcrypt.compare(inputData.password, user.password)).toBe(true);
+  });
 
-        const user = await createUser(inputData);
+  it("deve retornar todos os usuários", async () => {
+    const users = [
+      {
+        id: 1,
+        email: "user1@example.com",
+        username: "user1",
+        password: "hashedpassword1",
+      },
+      {
+        id: 2,
+        email: "user2@example.com",
+        username: "user2",
+        password: "hashedpassword2",
+      },
+    ];
 
-        expect(await bcrypt.compare(inputData.password, user.password)).toBe(true);
-    });
+    prismaMock.user.findMany.mockResolvedValue(users);
 
-    it('deve retornar todos os usuários', async () => {
-        const users = [
-            { id: 1, email: 'user1@example.com', username: 'user1', password: 'hashedpassword1' },
-            { id: 2, email: 'user2@example.com', username: 'user2', password: 'hashedpassword2' },
-        ];
+    const result = await getAllUsers();
 
-        prismaMock.user.findMany.mockResolvedValue(users);
+    expect(result).toEqual(users);
+  });
 
-        const result = await getAllUsers();
+  it("deve retornar uma lista vazia se não houver usuários", async () => {
+    prismaMock.user.findMany.mockResolvedValue([]);
 
-        expect(result).toEqual(users);
-    });
+    const result = await getAllUsers();
 
-    it('deve retornar uma lista vazia se não houver usuários', async () => {
-        prismaMock.user.findMany.mockResolvedValue([]);
+    expect(result).toEqual([]);
+  });
 
-        const result = await getAllUsers();
+  it("deve lançar um erro se a busca por usuários falhar", async () => {
+    prismaMock.user.findMany.mockRejectedValue(
+      new Error("Falha na busca por usuários"),
+    );
 
-        expect(result).toEqual([]);
-    });
+    await expect(getAllUsers()).rejects.toThrow("Falha na busca por usuários");
+  });
 
-    it('deve lançar um erro se a busca por usuários falhar', async () => {
-        prismaMock.user.findMany.mockRejectedValue(new Error("Falha na busca por usuários"));
+  it("deve retornar um usuário pelo ID", async () => {
+    const user = {
+      id: 1,
+      email: "user1@example.com",
+      username: "user1",
+      password: "hashedpassword1",
+    };
 
-        await expect(getAllUsers()).rejects.toThrow("Falha na busca por usuários");
-    });
+    prismaMock.user.findUnique.mockResolvedValue(user);
 
-    it('deve retornar um usuário pelo ID', async () => {
-        const user = { id: 1, email: 'user1@example.com', username: 'user1', password: 'hashedpassword1' };
+    const result = await getUserById(1);
 
-        prismaMock.user.findUnique.mockResolvedValue(user);
+    expect(result).toEqual(user);
+  });
 
-        const result = await getUserById(1);
+  it("deve retornar null se o usuário não for encontrado", async () => {
+    prismaMock.user.findUnique.mockResolvedValue(null);
 
-        expect(result).toEqual(user);
-    });
+    const result = await getUserById(999);
 
-    it('deve retornar null se o usuário não for encontrado', async () => {
-        prismaMock.user.findUnique.mockResolvedValue(null);
+    expect(result).toBeNull();
+  });
 
-        const result = await getUserById(999);
+  it("deve lançar um erro se a busca pelo usuário falhar", async () => {
+    prismaMock.user.findUnique.mockRejectedValue(
+      new Error("Falha na busca pelo usuário"),
+    );
 
-        expect(result).toBeNull();
-    });
+    await expect(getUserById(1)).rejects.toThrow("Falha na busca pelo usuário");
+  });
 
-    it('deve lançar um erro se a busca pelo usuário falhar', async () => {
-        prismaMock.user.findUnique.mockRejectedValue(new Error("Falha na busca pelo usuário"));
+  it("deve atualizar um usuário existente", async () => {
+    const userId = 1;
+    const updateData = {
+      email: "updated@example.com",
+      username: "updateduser",
+    };
+    const existingUser = {
+      id: userId,
+      email: "user1@example.com",
+      username: "user1",
+      password: "hashedpassword1",
+    };
+    const updatedUser = { ...existingUser, ...updateData };
 
-        await expect(getUserById(1)).rejects.toThrow("Falha na busca pelo usuário");
-    });
+    prismaMock.user.findUnique.mockResolvedValue(existingUser);
+    prismaMock.user.update.mockResolvedValue(updatedUser);
 
-    it('deve atualizar um usuário existente', async () => {
-        const userId = 1;
-        const updateData = { email: 'updated@example.com', username: 'updateduser' };
-        const existingUser = { id: userId, email: 'user1@example.com', username: 'user1', password: 'hashedpassword1' };
-        const updatedUser = { ...existingUser, ...updateData };
+    const result = await updateUser(userId, updateData);
 
-        prismaMock.user.findUnique.mockResolvedValue(existingUser);
-        prismaMock.user.update.mockResolvedValue(updatedUser);
+    expect(result).toEqual(updatedUser);
+  });
 
-        const result = await updateUser(userId, updateData);
+  it("deve lançar um erro se o usuário não for encontrado", async () => {
+    const userId = 999;
+    const updateData = {
+      email: "updated@example.com",
+      username: "updateduser",
+    };
 
-        expect(result).toEqual(updatedUser);
-    });
+    prismaMock.user.findUnique.mockResolvedValue(null);
 
-    it('deve lançar um erro se o usuário não for encontrado', async () => {
-        const userId = 999;
-        const updateData = { email: 'updated@example.com', username: 'updateduser' };
+    await expect(updateUser(userId, updateData)).rejects.toThrow(
+      "Usuário não encontrado",
+    );
+  });
 
-        prismaMock.user.findUnique.mockResolvedValue(null);
+  it("deve lançar um erro se a atualização do usuário falhar", async () => {
+    const userId = 1;
+    const updateData = {
+      email: "updated@example.com",
+      username: "updateduser",
+    };
+    const existingUser = {
+      id: userId,
+      email: "user1@example.com",
+      username: "user1",
+      password: "hashedpassword1",
+    };
 
-        await expect(updateUser(userId, updateData)).rejects.toThrow("Usuário não encontrado");
-    });
+    prismaMock.user.findUnique.mockResolvedValue(existingUser);
+    prismaMock.user.update.mockRejectedValue(
+      new Error("Falha na atualização do usuário"),
+    );
 
-    it('deve lançar um erro se a atualização do usuário falhar', async () => {
-        const userId = 1;
-        const updateData = { email: 'updated@example.com', username: 'updateduser' };
-        const existingUser = { id: userId, email: 'user1@example.com', username: 'user1', password: 'hashedpassword1' };
+    await expect(updateUser(userId, updateData)).rejects.toThrow(
+      "Falha na atualização do usuário",
+    );
+  });
 
-        prismaMock.user.findUnique.mockResolvedValue(existingUser);
-        prismaMock.user.update.mockRejectedValue(new Error("Falha na atualização do usuário"));
+  it("deve deletar um usuário existente", async () => {
+    const userId = 1;
+    const existingUser = {
+      id: userId,
+      email: "user1@example.com",
+      username: "user1",
+      password: "hashedpassword1",
+    };
 
-        await expect(updateUser(userId, updateData)).rejects.toThrow("Falha na atualização do usuário");
-    });
+    prismaMock.user.findUnique.mockResolvedValue(existingUser);
+    prismaMock.user.delete.mockResolvedValue(existingUser);
 
-    it('deve deletar um usuário existente', async () => {
-        const userId = 1;
-        const existingUser = { id: userId, email: 'user1@example.com', username: 'user1', password: 'hashedpassword1' };
+    const result = await deleteUser(userId);
 
-        prismaMock.user.findUnique.mockResolvedValue(existingUser);
-        prismaMock.user.delete.mockResolvedValue(existingUser);
+    expect(result).toEqual({ message: "Usuário deletado com sucesso!" });
+  });
 
-        const result = await deleteUser(userId);
+  it("deve lançar um erro se o usuário não for encontrado", async () => {
+    const userId = 999;
 
-        expect(result).toEqual({ message: "Usuário deletado com sucesso!" });
-    });
+    prismaMock.user.findUnique.mockResolvedValue(null);
 
-    it('deve lançar um erro se o usuário não for encontrado', async () => {
-        const userId = 999;
+    await expect(deleteUser(userId)).rejects.toThrow("Usuário não encontrado");
+  });
 
-        prismaMock.user.findUnique.mockResolvedValue(null);
+  it("deve lançar um erro se a deleção do usuário falhar", async () => {
+    const userId = 1;
+    const existingUser = {
+      id: userId,
+      email: "user1@example.com",
+      username: "user1",
+      password: "hashedpassword1",
+    };
 
-        await expect(deleteUser(userId)).rejects.toThrow("Usuário não encontrado");
-    });
+    prismaMock.user.findUnique.mockResolvedValue(existingUser);
+    prismaMock.user.delete.mockRejectedValue(
+      new Error("Falha na deleção do usuário"),
+    );
 
-    it('deve lançar um erro se a deleção do usuário falhar', async () => {
-        const userId = 1;
-        const existingUser = { id: userId, email: 'user1@example.com', username: 'user1', password: 'hashedpassword1' };
-
-        prismaMock.user.findUnique.mockResolvedValue(existingUser);
-        prismaMock.user.delete.mockRejectedValue(new Error("Falha na deleção do usuário"));
-
-        await expect(deleteUser(userId)).rejects.toThrow("Falha na deleção do usuário");
-    });
-
+    await expect(deleteUser(userId)).rejects.toThrow(
+      "Falha na deleção do usuário",
+    );
+  });
 });
