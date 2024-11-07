@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: Pipeline de CI
 
 on:
   push:
@@ -13,58 +13,90 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Fazer checkout do repositório
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
+      - name: Configurar Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "16"
+          node-version: "18" 
 
-      - name: Install dependencies
+      - name: Instalar dependências
         run: npm install
 
-      - name: Generate Prisma Client
+      - name: Gerar Prisma Client
         run: npx prisma generate
 
-      - name: Build project
+      - name: Verificar Prisma Client
+        run: test -d node_modules/.prisma/client
+
+      - name: Construir projeto
         run: npm run build
 
-      - name: Run tests
+      - name: Executar testes
         run: npm test
 
   lint:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Fazer checkout do repositório
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
+      - name: Configurar Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "16"
+          node-version: "18" # Atualizado para a versão 18
 
-      - name: Install dependencies
+      - name: Instalar dependências
         run: npm install
 
-      - name: Run linter
+      - name: Executar linter
         run: npm run lint
 
   format:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Fazer checkout do repositório
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
+      - name: Configurar Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "16"
+          node-version: "18" # Atualizado para a versão 18
 
-      - name: Install dependencies
+      - name: Instalar dependências
         run: npm install
 
-      - name: Run formatter
+      - name: Executar formatter
         run: npm run format
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Fazer checkout do repositório
+        uses: actions/checkout@v2
+
+      - name: Fazer deploy para produção
+        run: ./deploy.sh # Substitua pelo seu script de deploy
+
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fazer checkout do repositório
+        uses: actions/checkout@v2
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18" # Atualizado para a versão 18
+
+      - name: Instalar dependências
+        run: npm install
+
+      - name: Executar verificação de segurança
+        run: npm audit
