@@ -20,8 +20,12 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "${{ secrets.NODE_VERSION }}" 
+
       - name: Instalar dependências
         run: npm install
+
+      - name: Rodar migrações do Prisma
+        run: npx prisma migrate deploy
 
       - name: Gerar Prisma Client
         run: npx prisma generate
