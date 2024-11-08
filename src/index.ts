@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import helmet from 'helmet';
 
 // Carregar variáveis de ambiente com base no NODE_ENV
 const envPath =
@@ -14,6 +15,7 @@ import userRoutes from './routes/userRoutes';
 
 const app = express();
 
+app.use(helmet());
 app.use(express.json());
 app.use('/api', userRoutes);
 
