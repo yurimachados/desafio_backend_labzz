@@ -31,41 +31,39 @@ jobs:
 
     steps:
       - name: Fazer checkout do repositório
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Configurar Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: "${{ secrets.NODE_VERSION }}" 
+          node-version: "${{ secrets.NODE_VERSION }}"
+
+      - name: Cache de dependências do NPM
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-cache-
 
       - name: Instalar dependências
         run: npm install
 
-      - name: Configurar variáveis de ambiente
-        run: |
-          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/testdb" >> $GITHUB_ENV
+      - name: Executar testes
+        run: npm test
 
-      - name: Rodar migrações do Prisma
-        run: npx prisma migrate deploy --schema=./src/prisma/schema.prisma
-
-      - name: Gerar Prisma Client
-        run: npx prisma generate --schema=./src/prisma/schema.prisma
-
-      - name: Verificar Prisma Client
-        run: test -d node_modules/.prisma/client
-
-      - name: Construir projeto
-        run: npm run build
+      - name: Verificar vulnerabilidades
+        run: npm audit
 
   lint:
     runs-on: ubuntu-latest
 
     steps:
       - name: Fazer checkout do repositório
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Configurar Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: "${{ secrets.NODE_VERSION }}" 
 
@@ -80,10 +78,10 @@ jobs:
 
     steps:
       - name: Fazer checkout do repositório
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Configurar Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: "${{ secrets.NODE_VERSION }}" 
 
