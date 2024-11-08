@@ -7,7 +7,7 @@ import {
   updateUser,
   deleteUser,
 } from '../services/userService';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 jest.mock('../prismaClient', () => ({
   __esModule: true,
