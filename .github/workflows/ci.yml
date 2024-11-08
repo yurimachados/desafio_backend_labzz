@@ -36,7 +36,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "${{ secrets.NODE_VERSION }}"
+          node-version: '${{ secrets.NODE_VERSION }}'
 
       - name: Cache de dependências do NPM
         uses: actions/cache@v3
@@ -65,7 +65,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "${{ secrets.NODE_VERSION }}" 
+          node-version: '${{ secrets.NODE_VERSION }}'
 
       - name: Instalar dependências
         run: npm install
@@ -83,7 +83,7 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "${{ secrets.NODE_VERSION }}" 
+          node-version: '${{ secrets.NODE_VERSION }}'
 
       - name: Instalar dependências
         run: npm install

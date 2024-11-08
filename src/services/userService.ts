@@ -1,9 +1,9 @@
-import { PrismaClient, User } from "@prisma/client";
-import bcrypt from "bcrypt";
+import { PrismaClient, User } from '@prisma/client';
+import bcrypt from 'bcrypt';
 import {
   CreateUserInput,
   UpdateUserInput,
-} from "../interfaces/inputInterfaces";
+} from '../interfaces/inputInterfaces';
 
 const prisma = new PrismaClient();
 
@@ -20,7 +20,7 @@ export const createUser = async (data: CreateUserInput): Promise<User> => {
   });
 
   if (existingUser) {
-    throw new Error("Email já está em uso");
+    throw new Error('Email já está em uso');
   }
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -71,7 +71,7 @@ export const updateUser = async (
   });
 
   if (!user) {
-    throw new Error("Usuário não encontrado");
+    throw new Error('Usuário não encontrado');
   }
 
   const updatedData = prisma.user.update({
@@ -91,7 +91,7 @@ export const updateUser = async (
  */
 export const deleteUser = async (id: number): Promise<{ message: string }> => {
   if (isNaN(id)) {
-    throw new Error("ID inválido");
+    throw new Error('ID inválido');
   }
 
   const user = await prisma.user.findUnique({
@@ -101,7 +101,7 @@ export const deleteUser = async (id: number): Promise<{ message: string }> => {
   });
 
   if (!user) {
-    throw new Error("Usuário não encontrado");
+    throw new Error('Usuário não encontrado');
   }
 
   await prisma.user.delete({
@@ -110,5 +110,5 @@ export const deleteUser = async (id: number): Promise<{ message: string }> => {
     },
   });
 
-  return { message: "Usuário deletado com sucesso!" };
+  return { message: 'Usuário deletado com sucesso!' };
 };

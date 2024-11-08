@@ -1,24 +1,28 @@
-import pluginJs from "@eslint/js";
-import pluginPrettier from "eslint-plugin-prettier";
-import { configs as tsConfigs } from "@typescript-eslint/eslint-plugin";
-import globals from "globals";
-import prettier from "eslint-config-prettier";
+import globals from 'globals';
+import tseslint from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
+import prettier from 'eslint-config-prettier';
+import pluginPrettier from 'eslint-plugin-prettier';
 
 export default [
-  { ignores: ["dist/"] },
-  { files: ["**/*.{js,mjs,cjs,ts}"], ignores: ["dist/"] },
-  { files: ["**/*.js"], languageOptions: { sourceType: "commonjs" } },
-  { files: ["**/*.mjs"], languageOptions: { sourceType: "module" } },
-  { languageOptions: { globals: globals.browser } },
-  pluginJs.configs.recommended,
-  tsConfigs.recommended,
-  prettier,
+  { ignores: ['dist/'] },
   {
+    files: ['**/*.{js,mjs,cjs,ts}'],
+    ignores: ['dist/'],
+    languageOptions: {
+      parser: tsParser,
+      sourceType: 'module',
+      globals: globals.browser,
+    },
     plugins: {
+      '@typescript-eslint': tseslint,
       prettier: pluginPrettier,
     },
     rules: {
-      "prettier/prettier": "error",
+      'prettier/prettier': 'error',
+      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
+  prettier,
 ];
