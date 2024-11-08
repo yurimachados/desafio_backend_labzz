@@ -9,8 +9,6 @@ const envPath =
 
 dotenv.config({ path: envPath });
 
-console.log(`Carregando variáveis de ambiente de: ${envPath}`);
-
 import express from 'express';
 import userRoutes from './routes/userRoutes';
 
@@ -22,7 +20,6 @@ app.use('/api', userRoutes);
 const PORT = process.env.PORT || 3000;
 
 console.log(`Node Environment: ${process.env.NODE_ENV}`);
-console.log(`Database URL: ${process.env.DATABASE_URL}`);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
