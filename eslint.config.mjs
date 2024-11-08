@@ -1,6 +1,6 @@
 import pluginJs from "@eslint/js";
 import pluginPrettier from "eslint-plugin-prettier";
-import { configs as tsconfigs } from "@typescript-eslint/eslint-plugin";
+import { configs as tsConfigs } from "@typescript-eslint/eslint-plugin";
 import globals from "globals";
 import prettier from "eslint-config-prettier";
 
@@ -11,7 +11,7 @@ export default [
   { files: ["**/*.mjs"], languageOptions: { sourceType: "module" } },
   { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,
-  ...tsconfigs.recommended,
+  tsConfigs.recommended,
   prettier,
   {
     plugins: {
