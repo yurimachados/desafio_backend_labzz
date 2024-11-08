@@ -1,24 +1,34 @@
 import { Request, Response, NextFunction } from 'express';
 
-export const validateUser = (req: Request, res: Response, next: NextFunction): Response | void => {
-    const { name, email, password } = req.body;
+export const validateUser = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
+  const { name, email, password } = req.body;
 
-    if (!name || typeof name !== 'string') {
-        return res.status(400).json({ error: 'Nome é obrigatório e deve ser uma string' });
-    }
+  if (!name || typeof name !== 'string') {
+    res.status(400).json({ error: 'Nome é obrigatório e deve ser uma string' });
+    return;
+  }
 
-    if (!email || typeof email !== 'string') {
-        return res.status(400).json({ error: 'Email é obrigatório e deve ser valido' });
-    }
-    
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        return res.status(400).json({ error: 'Email inválido' });
-    }
+  if (!email || typeof email !== 'string') {
+    res.status(400).json({ error: 'Email é obrigatório e deve ser valido' });
+    return;
+  }
 
-    if (!password || typeof password !== 'string') {
-        return res.status(400).json({ error: 'Senha é obrigatória e deve ser uma string' });
-    }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    res.status(400).json({ error: 'Email inválido' });
+    return;
+  }
 
-    next();
+  if (!password || typeof password !== 'string') {
+    res
+      .status(400)
+      .json({ error: 'Senha é obrigatória e deve ser uma string' });
+    return;
+  }
+
+  next();
 };
