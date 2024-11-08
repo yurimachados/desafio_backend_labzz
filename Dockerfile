@@ -8,7 +8,10 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Instala as dependências
-RUN npm install --production
+RUN npm install 
+
+# Instala o Snyk globalmente
+RUN npm install -g snyk
 
 # Copia os arquivos do projeto
 COPY . .
@@ -18,6 +21,9 @@ RUN npx prisma generate
 
 # Compila o projeto
 RUN npm run build
+
+# Executa testes
+RUN npm test
 
 # Define a porta que a aplicação irá rodar
 EXPOSE 8080
