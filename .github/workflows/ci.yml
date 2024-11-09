@@ -29,6 +29,16 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
+      redis:
+        image: redis:6
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Fazer checkout do repositório
         uses: actions/checkout@v3
@@ -50,7 +60,7 @@ jobs:
         run: npm install
 
       - name: Executar testes
-        run: npm test
+        run: npm test -- --runInBand
 
       - name: Verificar vulnerabilidades
         run: npm audit
