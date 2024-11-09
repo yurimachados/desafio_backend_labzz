@@ -1,18 +1,9 @@
-import express, { Request, Response } from 'express';
-import authenticateJWT from '../middleware/authenticateJWT';
-import { body, validationResult } from 'express-validator';
-import prisma from '../prismaClient';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import express from 'express';
+import sessionSecurityMiddleware from '../middleware/sessionSecurityMiddleware';
+import { body } from 'express-validator';
+import { login } from '../controllers/authController';
 
 const router = express.Router();
-
-interface LoginBody {
-  email: string;
-  password: string;
-}
-
-const JWT_SECRET = process.env.JWT_SECRET || 'secreto';
 
 /**
  * Rota de Login
@@ -26,67 +17,14 @@ router.post(
       .isLength({ min: 6 })
       .withMessage('Senha deve ter pelo menos 6 caracteres'),
   ],
-  async (req: Request, res: Response): Promise<void> => {
-    console.log('Corpo da requisição', req.body);
-
-    const erros = validationResult(req);
-    if (!erros.isEmpty()) {
-      res.status(400).json({ erros: erros.array() });
-      return;
-    }
-
-    const { email, password } = req.body as LoginBody;
-
-    if (!password) {
-      res.status(400).json({ mensagem: 'Senha é obrigatória' });
-      return;
-    }
-
-    try {
-      const usuario = await prisma.user.findUnique({
-        where: { email },
-      });
-
-      if (!usuario) {
-        res.status(401).json({ mensagem: 'Credenciais inválidas' });
-        return;
-      }
-
-      // Comparar senhas
-      const senhaCorreta = await bcrypt.compare(password, usuario.password);
-      if (!senhaCorreta) {
-        res.status(401).json({ mensagem: 'Credenciais inválidas' });
-        return;
-      }
-
-      // Gerar token JWT
-      const token = jwt.sign(
-        { id: usuario.id, username: usuario.username, email: usuario.email },
-        JWT_SECRET,
-        {
-          expiresIn: '1h',
-        },
-      );
-
-      res.json({ token });
-      return;
-    } catch (error) {
-      console.error(error);
-
-      if (!res.headersSent) {
-        res.status(500).json({ mensagem: 'Erro ao realizar login' });
-      }
-    }
-
-    return;
-  },
+  login,
 );
 
 /**
  * Rota de Logout
  * Opcional: Invalidação de token (pode ser implementado com blacklist)
  */
-router.post('/logout', authenticateJWT, (req, res) => {
+router.post('/logout', sessionSecurityMiddleware, (req, res) => {
   // Implementar lógica de logout
   res.json({ message: 'Logout realizado com sucesso' });
 });
@@ -116,7 +54,7 @@ router.post('/logout', authenticateJWT, (req, res) => {
 //  * Rota para configurar 2FA
 //  * Gera e retorna o segredo para o usuário configurar seu app de autenticação
 //  */
-// router.post('/2fa/setup', authenticateJWT, (req, res) => {
+// router.post('/2fa/setup', sessionSecurityMiddleware, (req, res) => {
 //   const secret = speakeasy.generateSecret({ length: 20 });
 //   // Salvar secret no banco de dados associado ao usuário
 //   res.json({ secret: secret.base32 });
@@ -126,7 +64,7 @@ router.post('/logout', authenticateJWT, (req, res) => {
 //  * Rota para verificar código 2FA
 //  * Valida o código fornecido pelo usuário
 //  */
-// router.post('/2fa/verify', authenticateJWT, (req, res) => {
+// router.post('/2fa/verify', sessionSecurityMiddleware, (req, res) => {
 //   const { token, secret } = req.body;
 
 //   const verified = speakeasy.totp.verify({
