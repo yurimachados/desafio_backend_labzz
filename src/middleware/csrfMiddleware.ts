@@ -1,11 +1,12 @@
-import csurf from 'csurf';
-import { Request, Response, NextFunction } from 'express';
+import lusca from 'lusca';
 
-const csrfProtection = csurf({ cookie: true });
+const csrfMiddleware = lusca({
+  csrf: {
+    angular: false,
+    cookie: 'XSFR-TOKEN',
+    header: 'x-csrf-token',
+  },
+  xframe: 'SAMEORIGIN',
+});
 
-const setCsrfToken = (req: Request, res: Response, next: NextFunction) => {
-  res.cookie('XSRF-TOKEN', req.csrfToken());
-  next();
-};
-
-export { csrfProtection, setCsrfToken };
+export default csrfMiddleware;
