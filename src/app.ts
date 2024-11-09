@@ -12,6 +12,7 @@ import helmet from 'helmet';
 import express from 'express';
 import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes';
+import redisMiddleware from './middleware/redisMiddleware';
 
 if (process.env.NODE_ENV === 'development') {
   console.log('path', envPath);
@@ -20,6 +21,7 @@ if (process.env.NODE_ENV === 'development') {
 
 const app = express();
 
+app.use(redisMiddleware);
 app.use(helmet());
 app.use(express.json());
 
