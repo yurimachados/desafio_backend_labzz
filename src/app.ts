@@ -3,7 +3,7 @@ import path from 'path';
 import helmet from 'helmet';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import { csrfProtection, setCsrfToken } from './middleware/csrfMiddleware';
+import csrfMiddleware from './middleware/csrfMiddleware';
 import userRoutes from './routes/userRoutes';
 
 const envPath =
@@ -22,10 +22,9 @@ app.use(cookieParser());
 // Rotas públicas que não precisam de CSRF
 
 // Aplicação de proteção CSRF
-app.use(csrfProtection);
-app.use(setCsrfToken);
+app.use(csrfMiddleware);
 
 // Rotas protegidas por CSRF
-app.use('/api', userRoutes);
+app.use('/api/users', userRoutes);
 
 export default app;
