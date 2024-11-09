@@ -16,4 +16,8 @@ redis
     console.log('Erro ao conectar no Redis:', err);
   });
 
+export const closeRedisConnection = () => {
+  redis.disconnect();
+};
+
 export default redis;
