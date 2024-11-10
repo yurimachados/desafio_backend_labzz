@@ -18,9 +18,10 @@ const sessionSecurityMiddleware: RequestHandler = async (
 ): Promise<void> => {
   const token = req.cookies?.access_token;
   if (!token) {
-    res.status(401).json({ message: 'Access token missing' });
+    res.status(401).json({ message: 'Unauthorized' });
     return;
   }
+
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as {
       user_id: string;
@@ -33,24 +34,19 @@ const sessionSecurityMiddleware: RequestHandler = async (
       return;
     }
 
+    const csrfToken = req.header('x-csrf-token');
+    if (!csrfToken || csrfToken !== decoded.cst) {
+      res.status(401).json({ message: 'Invalid CSRF token' });
+      return;
+    }
+
     const session = await redis.get(`session:${decoded.user_id}`);
     if (!session) {
       res.status(401).json({ message: 'Session expired' });
       return;
     }
 
-    redis.get(`session:${decoded.user_id}`, (err, session) => {
-      if (err || !session)
-        return res.status(401).json({ message: 'Session expired' });
-
-      const csrfToken = req.header('x-csrf-token');
-      if (!csrfToken || csrfToken !== decoded.cst) {
-        res.status(403).json({ message: 'Invalid CSRF token' });
-        return;
-      }
-
-      next();
-    });
+    next();
   } catch (error) {
     console.error('Error verifying token:', error);
     res.status(401).json({ message: 'Invalid token' });
