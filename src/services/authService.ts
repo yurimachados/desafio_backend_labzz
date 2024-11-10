@@ -110,6 +110,15 @@ export const deleteSession = async (token: string, res: Response) => {
   await redis.del(`session:${userId}`);
 };
 
+export const getUserIdByToken = (token: string) => {
+  const decoded = decodeJwt(token);
+  if (!decoded) {
+    return null;
+  }
+
+  return (decoded as jwt.JwtPayload).user_id;
+};
+
 const decodeJwt = (token: string) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
