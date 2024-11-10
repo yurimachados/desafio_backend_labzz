@@ -1,7 +1,11 @@
 import express from 'express';
 import sessionSecurityMiddleware from '../middleware/sessionSecurityMiddleware';
-import { loginValidation } from '../middleware/validationMiddleware';
-import { login, logout } from '../controllers/authController';
+import {
+  checkActiveSession,
+  loginValidation,
+  registerValidation,
+} from '../middleware/validationMiddleware';
+import { login, logout, register } from '../controllers/authController';
 
 const router = express.Router();
 
@@ -16,6 +20,12 @@ router.post('/login', loginValidation, login);
  * Opcional: Invalidação de token (pode ser implementado com blacklist)
  */
 router.post('/logout', sessionSecurityMiddleware, logout);
+
+/**
+ * Rota de Registro
+ * Recebe dados do usuário, cria um novo usuário e retorna uma mensagem de sucesso
+ */
+router.post('/register', checkActiveSession, registerValidation, register);
 
 /**
  * Rota para iniciar fluxo OAuth2

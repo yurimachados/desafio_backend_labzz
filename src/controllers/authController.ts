@@ -3,13 +3,18 @@ import bcrypt from 'bcryptjs';
 import { validationResult } from 'express-validator';
 import redis from '../config/redisConfig';
 import {
-  generateJwt,
-  generateRandomToken,
-  generateRefreshToken,
+  createSession,
+  setAuthCookiesAndHeaders,
 } from '../services/authService';
-import { findUserByEmail } from '../services/userService';
+import { findUserByEmail, createUser } from '../services/userService';
 
 interface LoginBody {
+  email: string;
+  password: string;
+}
+
+interface RegisterBody {
+  username: string;
   email: string;
   password: string;
 }
@@ -37,20 +42,9 @@ export const login = async (req: Request, res: Response) => {
     return;
   }
 
-  const csrfToken = generateRandomToken();
-  const refreshToken = generateRefreshToken();
-  const token = generateJwt(user.id, csrfToken, refreshToken);
+  const { token, csrfToken } = await createSession(user.id);
 
-  redis.set(`session:${user.id}`, JSON.stringify({ csrfToken, refreshToken }));
-
-  res.cookie('access_token', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 60 * 60 * 24 * 7,
-    sameSite: 'strict',
-  });
-
-  res.setHeader('x-csrf-token', csrfToken);
+  setAuthCookiesAndHeaders(res, token, csrfToken);
 
   res.json({ message: 'Login successful' });
 };
@@ -73,4 +67,33 @@ export const logout = async (req: Request, res: Response) => {
   } else {
     res.status(400).json({ message: 'Access token not found' });
   }
+};
+
+export const register = async (req: Request, res: Response) => {
+  const erros = validationResult(req);
+  if (!erros.isEmpty()) {
+    let errorMessages = erros.array().map((error) => error.msg);
+    res.status(400).json({ erros: errorMessages });
+    return;
+  }
+
+  const { username, email, password } = req.body as RegisterBody;
+  const existingUser = await findUserByEmail(email);
+  if (existingUser) {
+    res.status(400).json({ message: 'User already exists' });
+    return;
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const newUser = await createUser({
+    username: username,
+    email: email,
+    password: hashedPassword,
+  });
+
+  const { token, csrfToken } = await createSession(newUser.id);
+
+  setAuthCookiesAndHeaders(res, token, csrfToken);
+
+  res.json({ message: 'Register successful' });
 };
