@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../app';
+import app from '../../../app';
 
 describe('Testando Helmet', () => {
   it('Deve retornar os cabeçalhos de segurança do Helmet', async () => {
