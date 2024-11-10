@@ -7,15 +7,6 @@ const redis = new Redis({
   connectTimeout: 10000,
 });
 
-redis
-  .ping()
-  .then((result) => {
-    console.log('Resposta do Redis:', result);
-  })
-  .catch((err) => {
-    console.log('Erro ao conectar no Redis:', err);
-  });
-
 export const closeRedisConnection = () => {
   redis.disconnect();
 };

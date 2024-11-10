@@ -15,7 +15,7 @@ const router: Router = express.Router();
  * @desc Cria um novo usuário
  * @access Público
  */
-router.post('/users', validateUser, (req: Request, res: Response) => {
+router.post('/', validateUser, (req: Request, res: Response) => {
   createUser(req, res);
 });
 
@@ -24,7 +24,7 @@ router.post('/users', validateUser, (req: Request, res: Response) => {
  * @desc Retorna todos os usuários
  * @access Público
  */
-router.get('/users', (req: Request, res: Response) => {
+router.get('/', (req: Request, res: Response) => {
   getAllUsers(req, res);
 });
 
@@ -33,7 +33,7 @@ router.get('/users', (req: Request, res: Response) => {
  * @desc Retorna um usuário pelo ID
  * @access Público
  */
-router.get('/users/:id', (req: Request, res: Response) => {
+router.get('/:id', (req: Request, res: Response) => {
   getUserById(req, res);
 });
 
@@ -42,13 +42,13 @@ router.get('/users/:id', (req: Request, res: Response) => {
  * @desc Atualiza um usuário pelo ID
  * @access Público
  */
-router.put('/users/:id', validateUser, updateUser);
+router.put('/:id', validateUser, updateUser);
 
 /**
  * @route DELETE /users/:id
  * @desc Deleta um usuário pelo ID
  * @access Público
  */
-router.delete('/users/:id', deleteUser);
+router.delete('/:id', deleteUser);
 
 export default router;

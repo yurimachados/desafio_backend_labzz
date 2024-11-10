@@ -112,3 +112,13 @@ export const deleteUser = async (id: number): Promise<{ message: string }> => {
 
   return { message: 'Usuário deletado com sucesso!' };
 };
+
+export const findUserByEmail = async (email: string) => {
+  const user = prisma.user.findUnique({
+    where: {
+      email: email,
+    },
+  });
+
+  return user;
+};

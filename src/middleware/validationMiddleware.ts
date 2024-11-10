@@ -1,5 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
+import { body } from 'express-validator';
 
+/**
+ * Middleware to validate user registration data.
+ * Checks if name, email, and password are provided and valid.
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next middleware function
+ */
 export const validateUser = (
   req: Request,
   res: Response,
@@ -32,3 +41,14 @@ export const validateUser = (
 
   next();
 };
+
+/**
+ * Middleware to validate login data.
+ * Checks if email is valid and password is at least 6 characters long.
+ */
+export const loginValidation = [
+  body('email').isEmail().withMessage('Invalid email'),
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Password should be at least 6 characters'),
+];
