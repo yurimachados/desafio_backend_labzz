@@ -21,8 +21,6 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@postgres:5432/${{ secrets.POSTGRES_DB }}
-
         ports:
           - 5432:5432
         options: >-
@@ -61,8 +59,15 @@ jobs:
       - name: Instalar dependências
         run: npm install
 
+      - name: Configurar banco de dados
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
+
       - name: Executar testes
         run: npm test -- --runInBand
+        env:
+          DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
 
       - name: Verificar vulnerabilidades
         run: npm audit
