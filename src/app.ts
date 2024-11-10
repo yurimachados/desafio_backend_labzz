@@ -14,6 +14,7 @@ import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes';
 import redisMiddleware from './middleware/redisMiddleware';
 import cookieParser from 'cookie-parser';
+import sessionSecurityMiddleware from './middleware/sessionSecurityMiddleware';
 
 if (process.env.NODE_ENV === 'development') {
   console.log('path', envPath);
@@ -29,6 +30,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 
-app.use('/api', userRoutes);
+app.use(sessionSecurityMiddleware);
+app.use('/api/users', userRoutes);
 
 export default app;
