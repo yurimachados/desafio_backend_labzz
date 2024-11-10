@@ -68,6 +68,7 @@ jobs:
         run: npm test -- --runInBand
         env:
           DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       - name: Verificar vulnerabilidades
         run: npm audit
