@@ -55,6 +55,7 @@ const sessionSecurityMiddleware: RequestHandler = async (
 
     const userId = getUserIdByToken(token);
 
+    console.log('userId', userId);
     req.authUserId = userId;
     next();
   } catch (error) {

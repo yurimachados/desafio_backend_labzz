@@ -11,6 +11,14 @@ export const createMessage = async ({
   authUserId: number;
   chatId: number;
 }) => {
+  const chat = await prisma.chat.findUnique({
+    where: { id: chatId },
+  });
+
+  if (!chat) {
+    throw new Error('Chat does not exist');
+  }
+
   await prisma.message.create({
     data: {
       content: content,
@@ -21,43 +29,34 @@ export const createMessage = async ({
   });
 };
 
-export const checkChat = async (authUserId: number, userId: number) => {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-
-  if (!user) {
-    throw new Error('User do not exist');
-  }
-
-  const existingChat = await prisma.userChat.findFirst({
-    where: {
-      OR: [
-        {
-          userId: authUserId,
-          chat: { userChats: { some: { userId: userId } } },
-        },
-        {
-          userId: userId,
-          chat: { userChats: { some: { userId: authUserId } } },
-        },
-      ],
-    },
+export const getMessageById = async (messageId: number) => {
+  const message = await prisma.message.findUnique({
+    where: { id: messageId },
   });
 
-  if (!existingChat) {
-    createChat(authUserId, userId);
+  if (!message) {
+    console.log('Message not found');
+    return null;
   }
 
-  return existingChat;
+  return message;
 };
 
-const createChat = async (authUserId: number, userId: number) => {
-  const chat = await prisma.chat.create({
-    data: {
-      userChats: {
-        create: [{ userId: authUserId }, { userId: userId }],
-      },
-    },
-  });
+export const checkIfMessageBelongsToAuthUser = async (
+  messageId: number,
+  authUserId: number,
+) => {
+  const message = await getMessageById(messageId);
 
-  return chat;
+  if (!message) {
+    return false;
+  }
+
+  return message.userId === authUserId;
+};
+
+export const deleteMessageFromDatabase = async (messageId: number) => {
+  await prisma.message.delete({
+    where: { id: messageId },
+  });
 };
