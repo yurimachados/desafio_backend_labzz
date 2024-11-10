@@ -1,12 +1,11 @@
-// userService.test.ts
-import { prismaMock } from '../utils/singleton';
+import { prismaMock } from '../../../utils/singleton';
 import {
   createUser,
   getAllUsers,
   getUserById,
   updateUser,
   deleteUser,
-} from '../services/userService';
+} from '../../../services/userService';
 import bcrypt from 'bcryptjs';
 
 jest.mock('../prismaClient', () => ({
