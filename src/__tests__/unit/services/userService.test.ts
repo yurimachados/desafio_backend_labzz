@@ -8,7 +8,7 @@ import {
 } from '../../../services/userService';
 import bcrypt from 'bcryptjs';
 
-jest.mock('../prismaClient', () => ({
+jest.mock('../../../prismaClient', () => ({
   __esModule: true,
   default: prismaMock,
 }));
