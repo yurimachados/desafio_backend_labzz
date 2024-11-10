@@ -10,20 +10,28 @@ dotenv.config({ path: envPath });
 
 import helmet from 'helmet';
 import express from 'express';
+import cors from 'cors';
 import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes';
 import redisMiddleware from './middleware/redisMiddleware';
 import cookieParser from 'cookie-parser';
 import sessionSecurityMiddleware from './middleware/sessionSecurityMiddleware';
 
-if (process.env.NODE_ENV === 'development') {
-  console.log('path', envPath);
-  console.log('db', process.env.DATABASE_URL);
-}
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:8081',
+    'http://localhost:8080',
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+};
 
 const app = express();
 
 app.use(redisMiddleware);
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(helmet());
 app.use(express.json());
