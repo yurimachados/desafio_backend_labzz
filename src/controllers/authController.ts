@@ -14,10 +14,19 @@ interface LoginBody {
   password: string;
 }
 
+/**
+ * Handles user login.
+ * Validates the request body, checks user credentials, generates JWT, CSRF token, and refresh token.
+ * Sets the access token as a cookie and returns a success message.
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ */
 export const login = async (req: Request, res: Response) => {
   const erros = validationResult(req);
   if (!erros.isEmpty()) {
-    res.status(400).json({ erros: erros.array() });
+    let errorMessages = erros.array().map((error) => error.msg);
+    res.status(400).json({ erros: errorMessages });
     return;
   }
 
@@ -44,4 +53,24 @@ export const login = async (req: Request, res: Response) => {
   res.setHeader('x-csrf-token', csrfToken);
 
   res.json({ message: 'Login successful' });
+};
+
+/**
+ * Handles user logout.
+ * Deletes the session from Redis and clears the access token cookie.
+ * Returns a success message if the access token is found, otherwise returns an error message.
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ */
+export const logout = async (req: Request, res: Response) => {
+  const accessToken = req.cookies['access_token'];
+
+  if (accessToken) {
+    await redis.del(`session:${accessToken}`);
+    res.clearCookie('access_token');
+    res.json({ message: 'Logout successful' });
+  } else {
+    res.status(400).json({ message: 'Access token not found' });
+  }
 };

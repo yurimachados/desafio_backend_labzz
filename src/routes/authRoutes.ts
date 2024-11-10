@@ -1,7 +1,7 @@
 import express from 'express';
 import sessionSecurityMiddleware from '../middleware/sessionSecurityMiddleware';
-import { body } from 'express-validator';
-import { login } from '../controllers/authController';
+import { loginValidation } from '../middleware/validationMiddleware';
+import { login, logout } from '../controllers/authController';
 
 const router = express.Router();
 
@@ -9,25 +9,13 @@ const router = express.Router();
  * Rota de Login
  * Recebe credenciais, autentica o usuário e retorna um token JWT
  */
-router.post(
-  '/login',
-  [
-    body('email').isEmail().withMessage('Email inválido'),
-    body('password')
-      .isLength({ min: 6 })
-      .withMessage('Senha deve ter pelo menos 6 caracteres'),
-  ],
-  login,
-);
+router.post('/login', loginValidation, login);
 
 /**
  * Rota de Logout
  * Opcional: Invalidação de token (pode ser implementado com blacklist)
  */
-router.post('/logout', sessionSecurityMiddleware, (req, res) => {
-  // Implementar lógica de logout
-  res.json({ message: 'Logout realizado com sucesso' });
-});
+router.post('/logout', sessionSecurityMiddleware, logout);
 
 /**
  * Rota para iniciar fluxo OAuth2

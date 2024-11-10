@@ -4,7 +4,12 @@ import redis from '../config/redisConfig';
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 /**
- * Middleware para autenticação JWT
+ * Middleware for JWT authentication.
+ * Verifies the JWT token, checks for expiration, and validates the session and CSRF token.
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next middleware function
  */
 const sessionSecurityMiddleware: RequestHandler = async (
   req: Request,
