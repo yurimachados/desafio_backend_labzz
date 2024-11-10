@@ -11,10 +11,11 @@ dotenv.config({ path: envPath });
 import helmet from 'helmet';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes';
+import messagesRoutes from './routes/messageRoutes';
 import redisMiddleware from './middleware/redisMiddleware';
-import cookieParser from 'cookie-parser';
 import sessionSecurityMiddleware from './middleware/sessionSecurityMiddleware';
 
 const corsOptions = {
@@ -40,5 +41,6 @@ app.use('/api/auth', authRoutes);
 
 app.use(sessionSecurityMiddleware);
 app.use('/api/users', userRoutes);
+app.use('/api/messages', messagesRoutes);
 
 export default app;
