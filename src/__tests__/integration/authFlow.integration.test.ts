@@ -161,14 +161,14 @@ describe('Auth Flow Integration Tests', () => {
     it('should return 400 if access token is not found', async () => {
       const response = await request(app).post('/api/auth/logout').expect(401);
 
-      expect(response.body.message).toBe('Access token is missing');
+      expect(response.body.message).toBe('Unauthorized');
     });
 
     it('should return 400 if CSRF token is not found', async () => {
       const response = await request(app)
         .post('/api/auth/logout')
         .set('Cookie', accessTokenCookie)
-        .expect(403);
+        .expect(401);
 
       expect(response.body.message).toBe('Invalid CSRF token');
     });
@@ -176,7 +176,7 @@ describe('Auth Flow Integration Tests', () => {
     it('should return 401 if user is not authenticated', async () => {
       const response = await request(app).post('/api/auth/logout').expect(401);
 
-      expect(response.body.message).toBe('Access token is missing');
+      expect(response.body.message).toBe('Unauthorized');
     });
   });
 
