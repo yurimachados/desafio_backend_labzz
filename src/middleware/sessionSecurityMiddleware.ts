@@ -1,4 +1,11 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    authUserId?: number;
+  }
+}
+import { getUserIdByToken } from '../services/authService';
 import jwt from 'jsonwebtoken';
 import redis from '../config/redisConfig';
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
@@ -46,6 +53,9 @@ const sessionSecurityMiddleware: RequestHandler = async (
       return;
     }
 
+    const userId = getUserIdByToken(token);
+
+    req.authUserId = userId;
     next();
   } catch (error) {
     console.error('Error verifying token:', error);
