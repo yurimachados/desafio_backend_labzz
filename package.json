@@ -7,7 +7,7 @@
     "start": "node dist/index.js",
     "build": "tsc",
     "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only src/index.ts",
-    "test": "jest --detectOpenHandles",
+    "test": "NODE_ENV=development jest --detectOpenHandles",
     "prisma": "prisma generate",
     "watch": "tsc --watch",
     "serve": "nodemon dist/index.js",
