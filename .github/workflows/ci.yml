@@ -59,8 +59,16 @@ jobs:
       - name: Instalar dependências
         run: npm install
 
+      - name: Configurar banco de dados
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
+
       - name: Executar testes
         run: npm test -- --runInBand
+        env:
+          DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/${{ secrets.POSTGRES_DB }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       - name: Verificar vulnerabilidades
         run: npm audit

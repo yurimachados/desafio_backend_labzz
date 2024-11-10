@@ -13,7 +13,7 @@ const router = express.Router();
  * Rota de Login
  * Recebe credenciais, autentica o usuário e retorna um token JWT
  */
-router.post('/login', loginValidation, login);
+router.post('/login', checkActiveSession, loginValidation, login);
 
 /**
  * Rota de Logout

@@ -94,3 +94,28 @@ export const setAuthCookiesAndHeaders = (
 
   res.setHeader('x-csrf-token', csrfToken);
 };
+
+export const deleteSession = async (token: string, res: Response) => {
+  const decoded = decodeJwt(token);
+  if (!decoded) {
+    throw new Error('Invalid token');
+  }
+
+  const userId = (decoded as jwt.JwtPayload).user_id;
+  if (!userId) {
+    res.status(400).json({ message: 'userId not found' });
+    return;
+  }
+
+  await redis.del(`session:${userId}`);
+};
+
+const decodeJwt = (token: string) => {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    return decoded;
+  } catch (err) {
+    console.error('Invalid token:', err);
+    return null;
+  }
+};
