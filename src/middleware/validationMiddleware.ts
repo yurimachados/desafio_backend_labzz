@@ -52,3 +52,29 @@ export const loginValidation = [
     .isLength({ min: 6 })
     .withMessage('Password should be at least 6 characters'),
 ];
+
+/**
+ * Middleware to validate registration data.
+ * Checks if name is provided and email is valid.
+ */
+export const registerValidation = [
+  body('username').isString().withMessage('Username is required'),
+  body('email').isEmail().withMessage('Invalid email'),
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Password should be at least 6 characters'),
+];
+/**
+ * Middleware to check if the user is already in an active session.
+ */
+export const checkActiveSession = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
+  if (req.cookies && req.cookies.access_token) {
+    res.status(400).json({ error: 'You are already in an active session' });
+    return;
+  }
+  next();
+};

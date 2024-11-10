@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import redis from '../config/redisConfig';
+import { Response } from 'express';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'sua-chave-secreta';
 
@@ -50,4 +52,45 @@ export const generateRefreshToken = (): string => {
  */
 export const generateRandomToken = () => {
   return crypto.randomBytes(32).toString('hex');
+};
+
+/**
+ * Creates a session for the user, generating JWT, CSRF token, and refresh token.
+ *
+ * @param userId - The unique identifier of the user.
+ * @returns An object containing the JWT, CSRF token, and refresh token.
+ */
+export const createSession = async (userId: number) => {
+  const csrfToken = generateRandomToken();
+  const refreshToken = generateRefreshToken();
+  const token = generateJwt(userId, csrfToken, refreshToken);
+
+  await redis.set(
+    `session:${userId}`,
+    JSON.stringify({ csrfToken, refreshToken }),
+  );
+
+  return { token, csrfToken };
+};
+
+/**
+ * Sets authentication cookies and headers.
+ *
+ * @param res - Express response object.
+ * @param token - JWT token.
+ * @param csrfToken - CSRF token.
+ */
+export const setAuthCookiesAndHeaders = (
+  res: Response,
+  token: string,
+  csrfToken: string,
+) => {
+  res.cookie('access_token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24 * 7,
+    sameSite: 'strict',
+  });
+
+  res.setHeader('x-csrf-token', csrfToken);
 };
