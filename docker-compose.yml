@@ -3,6 +3,9 @@ version: '3.8'
 services:
   app:
     build: .
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     ports:
       - "8081:8080"
     env_file:
