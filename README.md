@@ -6,7 +6,9 @@ Este projeto é uma aplicação backend desenvolvida com **TypeScript** e **Expr
 
 ## Instalação do ProjetoClone o repositório:
 
-1. ```git
+1. Clone o projeto:
+
+   ```git
    git clone https://github.com/yurimachados/desafio_backend_labzz.git .
    ```
 2. Instale as dependências:
