@@ -1,10 +1,10 @@
 # Desafio Backend Labzz
 
 ## Visão Geral
+ 
+Este projeto é uma aplicação backend desenvolvida com **TypeScript** e **Express.js**, que implementa funcionalidades de autenticação, gerenciamento de usuarios e mensagens. A aplicação está containerizada com **Docker** e conta com pipeline de integração contínua visando a garantia de formatação do código, testes unitários, verificações de vulnerabilidades e exposição de dados sensíveis.
 
-Este projeto é uma aplicação backend desenvolvida com **TypeScript** e **Express.js**, que implementa funcionalidades de autenticação, gerenciamento de usuários e comunicação em tempo real utilizando. A aplicação está containerizada com **Docker** e conta com pipeline de integração contínua visando a garantia de padronização e formatação do código, testes unitários, verificações de vulnerabilidades e exposição de dados sensíveis.
-
-## Instalação do ProjetoClone o repositório:
+## Instalação do Projeto:
 
 1. Clone o projeto:
 
