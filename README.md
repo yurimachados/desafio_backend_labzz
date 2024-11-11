@@ -50,7 +50,6 @@ Este projeto é uma aplicação backend desenvolvida com **TypeScript** e **Expr
 
 ## Funcionalidades implementadas
 
-
 ### Autenticação
 
 No fluxo de autenticação, implementei o básico bem feito: registro, login, logout e checagem de sessão, sempre com uma preocupação extra com a segurança.
@@ -90,3 +89,5 @@ No fluxo de autenticação, implementei o básico bem feito: registro, login, lo
 - Design stateless
 
 ### Documentação
+
+[Documentação Postman](src/msc/Backend_Labzz.postman_collection.json)
