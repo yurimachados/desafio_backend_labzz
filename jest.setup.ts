@@ -1,6 +1,6 @@
-import { closeRedisConnection } from './src/config/redisConfig';
+import redis from './src/config/redisConfig';
 
 jest.setTimeout(30000);
-afterAll(() => {
-  closeRedisConnection();
+afterAll(async () => {
+  await redis.quit();
 });
