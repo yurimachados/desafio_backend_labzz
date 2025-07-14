@@ -1,4 +1,4 @@
-import { PrismaClient, User } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import {
   CreateUserInput,
@@ -6,6 +6,16 @@ import {
 } from '../interfaces/inputInterfaces';
 
 const prisma = new PrismaClient();
+
+// Define User type based on Prisma schema
+type User = {
+  id: number;
+  username: string;
+  email: string;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 /**
  * Cria um novo usuário com os dados fornecidos.

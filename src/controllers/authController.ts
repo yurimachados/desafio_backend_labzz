@@ -4,7 +4,9 @@ import { validationResult } from 'express-validator';
 import {
   createSession,
   setAuthCookiesAndHeaders,
+  setRefreshTokenCookie,
   deleteSession,
+  refreshAccessToken,
 } from '../services/authService';
 import { findUserByEmail, createUser } from '../services/userService';
 
@@ -48,9 +50,10 @@ export const login = async (req: Request, res: Response) => {
     return;
   }
 
-  const { token, csrfToken } = await createSession(user.id);
+  const { token, csrfToken, refreshToken } = await createSession(user.id);
 
   setAuthCookiesAndHeaders(res, token, csrfToken);
+  setRefreshTokenCookie(res, refreshToken);
 
   res.json({ message: 'Login successful' });
 };
@@ -66,9 +69,43 @@ export const login = async (req: Request, res: Response) => {
 export const logout = async (req: Request, res: Response) => {
   const accessToken = req.cookies['access_token'];
 
-  deleteSession(accessToken, res);
-  res.clearCookie('access_token');
+  if (accessToken) {
+    deleteSession(accessToken, res);
+  } else {
+    // Still clear cookies even if no access token
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+  }
+
   res.json({ message: 'Logout successful' });
+};
+
+/**
+ * Handles token refresh.
+ * Uses the refresh token from cookies to generate a new access token.
+ *
+ * @param req - Express request object
+ * @param res - Express response object
+ */
+export const refresh = async (req: Request, res: Response) => {
+  const refreshToken = req.cookies['refresh_token'];
+
+  if (!refreshToken) {
+    res.status(401).json({ message: 'Refresh token not found' });
+    return;
+  }
+
+  try {
+    const { token, csrfToken } = await refreshAccessToken(refreshToken);
+
+    setAuthCookiesAndHeaders(res, token, csrfToken);
+
+    res.json({ message: 'Token refreshed successfully' });
+  } catch (_error) {
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+    res.status(401).json({ message: 'Invalid or expired refresh token' });
+  }
 };
 
 export const register = async (req: Request, res: Response) => {
@@ -92,9 +129,10 @@ export const register = async (req: Request, res: Response) => {
     password: password,
   });
 
-  const { token, csrfToken } = await createSession(newUser.id);
+  const { token, csrfToken, refreshToken } = await createSession(newUser.id);
 
   setAuthCookiesAndHeaders(res, token, csrfToken);
+  setRefreshTokenCookie(res, refreshToken);
 
   res.status(201).json({ message: 'Register successful' });
 };

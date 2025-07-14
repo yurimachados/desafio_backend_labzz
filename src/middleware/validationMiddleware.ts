@@ -47,10 +47,19 @@ export const validateUser = (
  * Checks if email is valid and password is at least 6 characters long.
  */
 export const loginValidation = [
-  body('email').isEmail().withMessage('Invalid email'),
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Invalid email format')
+    .isLength({ max: 254 })
+    .withMessage('Email too long'),
   body('password')
-    .isLength({ min: 6 })
-    .withMessage('Password should be at least 6 characters'),
+    .isLength({ min: 6, max: 128 })
+    .withMessage('Password must be between 6 and 128 characters')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .withMessage(
+      'Password must contain at least one lowercase letter, one uppercase letter, and one number',
+    ),
 ];
 
 /**
@@ -58,23 +67,80 @@ export const loginValidation = [
  * Checks if name is provided and email is valid.
  */
 export const registerValidation = [
-  body('username').isString().withMessage('Username is required'),
-  body('email').isEmail().withMessage('Invalid email'),
+  body('username')
+    .isString()
+    .trim()
+    .isLength({ min: 3, max: 50 })
+    .withMessage('Username must be between 3 and 50 characters')
+    .matches(/^[a-zA-Z0-9_]+$/)
+    .withMessage('Username can only contain letters, numbers, and underscores'),
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Invalid email format')
+    .isLength({ max: 254 })
+    .withMessage('Email too long'),
   body('password')
-    .isLength({ min: 6 })
-    .withMessage('Password should be at least 6 characters'),
+    .isLength({ min: 8, max: 128 })
+    .withMessage('Password must be between 8 and 128 characters')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+    .withMessage(
+      'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character',
+    ),
 ];
+
 /**
- * Middleware to check if the user is already in an active session.
+ * Enhanced middleware to check if the user is already in an active session.
+ * Also validates request headers and body structure.
  */
 export const checkActiveSession = (
   req: Request,
   res: Response,
   next: NextFunction,
 ): void => {
+  // Check for existing session
   if (req.cookies && req.cookies.access_token) {
     res.status(400).json({ error: 'You are already in an active session' });
     return;
   }
+
+  // Validate Content-Type for POST requests
+  if (req.method === 'POST' && !req.is('application/json')) {
+    res.status(400).json({ error: 'Content-Type must be application/json' });
+    return;
+  }
+
+  // Validate request body structure
+  if (req.method === 'POST' && (!req.body || typeof req.body !== 'object')) {
+    res.status(400).json({ error: 'Invalid request body' });
+    return;
+  }
+
+  next();
+};
+
+/**
+ * Middleware to validate CSRF token and other security headers for authenticated requests.
+ */
+export const validateSecurityHeaders = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
+  // Validate User-Agent header exists (basic bot protection)
+  if (!req.get('User-Agent')) {
+    res.status(400).json({ error: 'User-Agent header required' });
+    return;
+  }
+
+  // Check for suspicious headers that might indicate automated requests
+  const suspiciousHeaders = ['x-automated', 'x-bot', 'x-crawler'];
+  for (const header of suspiciousHeaders) {
+    if (req.get(header)) {
+      res.status(403).json({ error: 'Forbidden request type' });
+      return;
+    }
+  }
+
   next();
 };

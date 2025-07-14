@@ -1,11 +1,21 @@
 import express from 'express';
 import sessionSecurityMiddleware from '../middleware/sessionSecurityMiddleware';
 import {
+  authRateLimit,
+  refreshTokenRateLimit,
+} from '../middleware/rateLimitMiddleware';
+import {
   checkActiveSession,
   loginValidation,
   registerValidation,
+  validateSecurityHeaders,
 } from '../middleware/validationMiddleware';
-import { login, logout, register } from '../controllers/authController';
+import {
+  login,
+  logout,
+  register,
+  refresh,
+} from '../controllers/authController';
 
 const router = express.Router();
 
@@ -13,19 +23,49 @@ const router = express.Router();
  * Rota de Login
  * Recebe credenciais, autentica o usuário e retorna um token JWT
  */
-router.post('/login', checkActiveSession, loginValidation, login);
+router.post(
+  '/login',
+  authRateLimit,
+  validateSecurityHeaders,
+  checkActiveSession,
+  loginValidation,
+  login,
+);
 
 /**
  * Rota de Logout
  * Opcional: Invalidação de token (pode ser implementado com blacklist)
  */
-router.post('/logout', sessionSecurityMiddleware, logout);
+router.post(
+  '/logout',
+  validateSecurityHeaders,
+  sessionSecurityMiddleware,
+  logout,
+);
 
 /**
  * Rota de Registro
  * Recebe dados do usuário, cria um novo usuário e retorna uma mensagem de sucesso
  */
-router.post('/register', checkActiveSession, registerValidation, register);
+router.post(
+  '/register',
+  authRateLimit,
+  validateSecurityHeaders,
+  checkActiveSession,
+  registerValidation,
+  register,
+);
+
+/**
+ * Rota de Refresh Token
+ * Renova o token de acesso usando o refresh token
+ */
+router.post(
+  '/refresh',
+  refreshTokenRateLimit,
+  validateSecurityHeaders,
+  refresh,
+);
 
 /**
  * Rota para iniciar fluxo OAuth2
